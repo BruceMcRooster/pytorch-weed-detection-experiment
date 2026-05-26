@@ -12,6 +12,9 @@ wheels/
 # data
 data/*
 runs/*
+!data/weeds/
+data/weeds/*
+!data/weeds/README.*
 
 # editor files
 .idea/
