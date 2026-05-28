@@ -8,4 +8,5 @@ dependencies = [
     "pycocotools>=2.0.11",
     "torch>=2.12.0",
     "torchvision>=0.27.0",
+    "ultralytics>=8.4.56",
 ]
