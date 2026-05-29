@@ -18,6 +18,7 @@ def train(
     device: Literal['cpu', 'cuda'] = 'cpu',
     save_period: int = 10,
     workers: int = 4,
+    quiet: bool = False,
 ):
     if type(datayaml) != Path:
         datayaml = Path(datayaml)
@@ -36,6 +37,7 @@ def train(
         workers=workers,
         pretrained=True,
         save_period=save_period,
+        verbose=(not quiet)
     )
 
     return model, results
@@ -44,6 +46,7 @@ def predict(
     weights: Path,
     input_file: Path,
     conf: float = 0.5,
+    quiet: bool = False
 ):
     if type(weights) != Path:
         weights = Path(weights)
@@ -65,7 +68,7 @@ def predict(
         if file.suffix != '.jpg' and file.suffix != '.jpeg' and file.suffix != '.png':
             print(f"Skipping {file}")
             continue
-        result = model(file, save=True, conf=conf)
+        result = model(file, save=True, conf=conf, verbose=not quiet)
         results[file] = result
 
     return results
@@ -84,15 +87,19 @@ if __name__ == "__main__":
     target_function = args.pop('func')
     args.pop('command')
 
+    quiet = False
+    if 'quiet' in args:
+        quiet = args['quiet']
+
     if target_function == train:
         model, results = target_function(**args)
-        print("\n\n=====FINAL RESULTS=====\n\n")
-        print(results)
+        if not quiet:
+            print("\n\n=====FINAL RESULTS=====\n\n")
+            print(results)
     elif target_function == predict:
         results = target_function(**args)
-        print("\n\n=====PREDICTION RESULTS=====\n\n")
-        for file, result in results.items():
-            print(f"\n====={file}=====\n")
-            print(result)
-
-
+        if not quiet:
+            print("\n\n=====PREDICTION RESULTS=====\n\n")
+            for file, result in results.items():
+                print(f"\n====={file}=====\n")
+                print(result)
