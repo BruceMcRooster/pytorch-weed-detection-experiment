@@ -58,20 +58,11 @@ def predict(
 
     model = YOLO(weights)
 
-    results = {}
+    if not quiet and input_file.is_dir():
+        print("Detected directory as input, will iterate through all files")
 
-    if input_file.is_dir():
-        print(f"Detected input_file is a directory, iterating over files")
+    return model(input_file, save=True, conf=conf, verbose=not quiet)
 
-    # deduplicate logic to keep it in sync
-    for file in input_file.iterdir() if input_file.is_dir() else [input_file]:
-        if file.suffix != '.jpg' and file.suffix != '.jpeg' and file.suffix != '.png':
-            print(f"Skipping {file}")
-            continue
-        result = model(file, save=True, conf=conf, verbose=not quiet)
-        results[file] = result
-
-    return results
 
 if __name__ == "__main__":
     import argparse
@@ -100,6 +91,10 @@ if __name__ == "__main__":
         results = target_function(**args)
         if not quiet:
             print("\n\n=====PREDICTION RESULTS=====\n\n")
-            for file, result in results.items():
-                print(f"\n====={file}=====\n")
+            total_infer_time = 0.0
+            for result in results:
+                print(f"\n====={result.path}=====\n")
                 print(result)
+                total_infer_time += result.speed['inference']
+            print("\n\n=====CUMULATIVE RESULTS=====\n\n")
+            print(f"Average inference time: {total_infer_time / len(results):.3f}ms")
